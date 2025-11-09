@@ -14,20 +14,11 @@ document.getElementById("generateBtn").addEventListener("click", async () => {
   document.getElementById("generateBtn").innerText = "⏳ جاري التوليد...";
 
   try {
-    const response = await fetch(
-      `https://api.elevenlabs.io/v1/text-to-speech/${voice}`,
-      {
-        method: "POST",
-        headers: {
-          "xi-api-key": API_KEY,
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({
-          model_id: "eleven_multilingual_v2",
-          text,
-        }),
-      }
-    );
+    const response = await fetch("/api/tts", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ text, voice, model: "eleven_multilingual_v2" }),
+  });
 
     if (!response.ok) throw new Error("حدث خطأ أثناء توليد الصوت 😔");
 
@@ -36,7 +27,9 @@ document.getElementById("generateBtn").addEventListener("click", async () => {
     const url = URL.createObjectURL(blob);
     audioPlayer.src = url;
     audioPlayer.play();
-  } catch (error) {
+  } 
+  
+  catch (error) {
     alert(error.message);
   }
 
