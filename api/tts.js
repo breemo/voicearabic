@@ -7,6 +7,7 @@ export default async function handler(req, res) {
     const { text, voice = "EXAVITQu4vr4xnSDxMaL", model_id = "eleven_multilingual_v2" } = req.body;
 
     const apiKey = process.env.ELEVENLABS_API_KEY;
+    console.log("🔑 API KEY FOUND:", !!apiKey);
 
     const response = await fetch(`https://api.elevenlabs.io/v1/text-to-speech/${voice}`, {
       method: 'POST',
