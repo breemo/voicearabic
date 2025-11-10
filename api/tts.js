@@ -1,52 +1,37 @@
 export default async function handler(req, res) {
-  if (req.method !== "POST") {
-    return res.status(405).json({ error: "Method not allowed. Use POST instead." });
-  }
-
-  const { text, voice, model } = req.body;
-
-  if (!text || !voice || !model) {
-    return res.status(400).json({ error: "Missing required fields: text, voice, or model." });
-  }
-
-  const apiKey = process.env.ELEVENLABS_API_KEY;
-  if (!apiKey) {
-    return res.status(500).json({ error: "Server configuration missing ELEVENLABS_API_KEY." });
+  if (req.method !== 'POST') {
+    return res.status(405).json({ message: 'Method Not Allowed' });
   }
 
   try {
+    const { text, voice = "EXAVITQu4vr4xnSDxMaL", model_id = "eleven_multilingual_v2" } = req.body;
+
+    const apiKey = process.env.ELEVENLABS_API_KEY;
+
     const response = await fetch(`https://api.elevenlabs.io/v1/text-to-speech/${voice}`, {
-      method: "POST",
+      method: 'POST',
       headers: {
-        "Content-Type": "application/json",
-        "xi-api-key": apiKey,
+        'Accept': 'audio/mpeg',
+        'xi-api-key': apiKey,
+        'Content-Type': 'application/json',
       },
       body: JSON.stringify({
         text,
-        model_id: model,
-        voice_settings: {
-          stability: 0.35,
-          similarity_boost: 0.8,
-        },
+        model_id
       }),
     });
 
-    // إذا رجعت ElevenLabs خطأ، بنعرضه بالتفصيل
     if (!response.ok) {
-      const errorData = await response.json().catch(() => ({}));
-      console.error("❌ ElevenLabs Error:", errorData);
-      return res.status(response.status).json({
-        error: "ElevenLabs API returned an error.",
-        details: errorData,
-      });
+      const errorData = await response.text();
+      return res.status(response.status).json({ error: errorData });
     }
 
-    // لو تم توليد الصوت بنجاح
     const audioBuffer = await response.arrayBuffer();
-    res.setHeader("Content-Type", "audio/mpeg");
+
+    res.setHeader('Content-Type', 'audio/mpeg');
     res.send(Buffer.from(audioBuffer));
-  } catch (err) {
-    console.error("🔥 Server Error:", err);
-    res.status(500).json({ error: "Server failed to process TTS request.", details: err.message });
+  } catch (error) {
+    console.error('Error:', error);
+    res.status(500).json({ error: error.message });
   }
 }
