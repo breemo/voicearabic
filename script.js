@@ -1,7 +1,7 @@
-async function generateSpeech() {
-  const text = document.getElementById("text").value;
-  const voice = document.getElementById("voice").value;
-  const model = document.getElementById("model").value;
+async function generateVoice() {
+  const text = document.getElementById("text-input").value;
+  const voice = document.getElementById("voice-select").value;
+  const model = document.getElementById("model-select").value;
 
   document.getElementById("status").innerText = "⏳ جاري توليد الصوت...";
 
@@ -9,21 +9,22 @@ async function generateSpeech() {
     const response = await fetch("/api/tts", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ text, voice, model }),
+      body: JSON.stringify({ text, voice, model_id: model }),
     });
 
-    if (!response.ok) throw new Error("خطأ في الاتصال مع الخادم");
+    if (!response.ok) {
+      throw new Error("❌ فشل توليد الصوت");
+    }
 
     const blob = await response.blob();
     const audioUrl = URL.createObjectURL(blob);
-
-    const audio = document.getElementById("audioPlayer");
-    audio.src = audioUrl;
-    audio.play();
+    const player = document.getElementById("audio-player");
+    player.src = audioUrl;
+    player.play();
 
     document.getElementById("status").innerText = "✅ تم توليد الصوت بنجاح!";
-  } catch (err) {
-    alert("⚠️ فشل توليد الصوت: " + err.message);
-    document.getElementById("status").innerText = "";
+  } catch (error) {
+    alert("⚠️ فشل توليد الصوت: " + error.message);
+    document.getElementById("status").innerText = "❌ فشل توليد الصوت";
   }
 }
